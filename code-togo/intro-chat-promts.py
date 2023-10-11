@@ -11,15 +11,13 @@ openai.api_key = os.getenv("OPEN_API_KEY")
 
 llm_model = "gpt-3.5-turbo"
 
-prompt = "How old is the Universe"
-#prompt = "What is the weather in Roanoke VA"
-messages = [HumanMessage(content=prompt)]
+chat_model = ChatOpenAI(temperature=0.7, model=llm_model)
 
-chat_model = ChatOpenAI(temperature=0.7)
-llm = OpenAI(temperature=0.7)
-
-
-print(llm.predict("What is the weather in Sandy UT"))
-print(30*"=")
-print(chat_model.predict_messages(messages).content)
-#print(chat_model.predict("What is the weather in Roanoke VA"))
+def get_completion(prompt, model=llm_model):
+    messages = [{"role": "user", "content": prompt}]
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        temperature=0,
+    )
+    return response.choices[0].message["content"]
