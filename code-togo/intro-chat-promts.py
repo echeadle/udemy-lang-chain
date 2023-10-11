@@ -1,14 +1,16 @@
 import os
 import openai
 from dotenv import find_dotenv, load_dotenv
-from langchain.llms import OpenAI 
-from langchain.chat_models import ChatOpenAI 
+from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
 from langchain.schema import HumanMessage
 
 load_dotenv(find_dotenv())
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 llm_model = "gpt-3.5-turbo"
+
 
 # OpenAI Completion Endpoint
 def get_completion(prompt, model=llm_model):
@@ -19,6 +21,7 @@ def get_completion(prompt, model=llm_model):
         temperature=0,
     )
     return response.choices[0].message["content"]
+
 
 # Translate text, review
 customer_review = """
@@ -35,8 +38,22 @@ promp = f"""
     please translate the new review message into {language}.
 """
 
-if __name__ == "__main__":
+rewrite = get_completion(prompt=promp)
+# print(rewrite)
 
-    rewrite = get_completion(prompt=promp)
-    print(rewrite)
-    
+
+chat_model = ChatOpenAI(temperature=0.7, model=llm_model)
+
+template_string = """
+    Translate the following text {customer_review} into English in a polite tone.
+    And the company name is {company_name}
+"""
+
+prompt_template = ChatPromptTemplate.from_template(template_string)
+
+translation_message = prompt_template.format_messages(
+    customer_review=customer_review, company_name="Google"
+)
+
+response = chat_model(translation_message)
+print(response.content)
